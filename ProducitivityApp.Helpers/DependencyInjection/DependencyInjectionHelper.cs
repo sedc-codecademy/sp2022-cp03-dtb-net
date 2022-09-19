@@ -23,12 +23,14 @@ namespace ProducitivityApp.Helpers.DependencyInjection
             services.AddTransient<ISessionRepository, SessionRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ITaskRepository, TaskRepository>();
+            services.AddTransient<IReminderRepository, ReminderRepository>();
         }
 
         public static void InjectServices(IServiceCollection services)
         {
             services.AddTransient<ISessionService, SessionService>();
             services.AddTransient<IUserService, UserService>();
+            //services.AddTransient<IReminderService, ReminderService>();
         }
     }
 }

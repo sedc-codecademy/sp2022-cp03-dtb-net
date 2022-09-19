@@ -22,6 +22,8 @@ namespace ProductivityApp.Domain.Entities
 
         public List<Session> Sessions { get; set; } = new List<Session>() { };
 
+        public List<Reminder> Reminders { get; set; } = new List<Reminder>() { };
+
 
     }
 }

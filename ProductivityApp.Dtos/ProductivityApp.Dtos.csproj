@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ReminderDtos\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ProductivityApp.Domain\ProductivityApp.Domain.csproj" />
   </ItemGroup>
 

@@ -15,7 +15,8 @@ namespace ProducitivityApp.DataAccess
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Session> Sessions => Set<Session>();
-        public DbSet<Task> Tasks => Set<Task>();    
+        public DbSet<Task> Tasks => Set<Task>();
+        public DbSet<Reminder> Reminders => Set<Reminder>();
         
 
 
@@ -95,6 +96,31 @@ namespace ProducitivityApp.DataAccess
                 .HasForeignKey(s => s.SessionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+
+            //Reminder
+            modelBuilder.Entity<Reminder>()
+                .Property(f => f.ReminderInfo)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<Reminder>()
+                .Property(l => l.ReminderTime)
+                .IsRequired();
+
+            modelBuilder.Entity<Reminder>()
+                .Property(l => l.ReminderDate)
+                .IsRequired();
+
+            modelBuilder.Entity<Reminder>()
+                .Property(u => u.Priority)
+                .HasMaxLength(30)
+                .IsRequired();
+
+            //Reminder -> Reminder Relation
+            modelBuilder.Entity<Reminder>()
+                .HasOne(x => x.User)
+                .WithMany(x => x.Reminders)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
 
         }

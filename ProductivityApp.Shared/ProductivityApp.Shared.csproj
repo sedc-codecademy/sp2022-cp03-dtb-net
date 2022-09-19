@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="CustomTaskExceptions\" />
-    <Folder Include="CustomReminderExceptions\" />
   </ItemGroup>
 
 </Project>
