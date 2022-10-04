@@ -30,7 +30,7 @@ namespace ProducitivityApp.Helpers.DependencyInjection
         {
             services.AddTransient<ISessionService, SessionService>();
             services.AddTransient<IUserService, UserService>();
-            //services.AddTransient<IReminderService, ReminderService>();
+            services.AddTransient<IReminderService, ReminderService>();
         }
     }
 }

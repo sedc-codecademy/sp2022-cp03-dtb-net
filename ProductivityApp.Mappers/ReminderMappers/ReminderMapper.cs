@@ -14,7 +14,8 @@ namespace ProductivityApp.Mappers.ReminderMappers
         {
             return new ReminderDto
             {
-                ReminderInfo = userDb.ReminderInfo,
+                ReminderNote = userDb.ReminderNote,
+                ReminderTitle = userDb.ReminderTitle,
                 ReminderDate = userDb.ReminderDate,
                 ReminderTime = userDb.ReminderTime,
                 Priority = userDb.Priority
@@ -25,7 +26,8 @@ namespace ProductivityApp.Mappers.ReminderMappers
         {
             return new Reminder
             {
-                ReminderInfo = addReminderDto.ReminderInfo,
+                ReminderTitle = addReminderDto.ReminderTitle,
+                ReminderNote = addReminderDto.ReminderNote,
                 ReminderTime = addReminderDto.ReminderTime,
                 ReminderDate = addReminderDto.ReminderDate,
                 Priority = addReminderDto.Priority,
@@ -35,7 +37,8 @@ namespace ProductivityApp.Mappers.ReminderMappers
 
         public static Reminder UpdateDbReminder(this UpdateReminderDto updateReminderDto, Reminder reminderDb)
         {
-            reminderDb.ReminderInfo = updateReminderDto.ReminderInfo;
+            reminderDb.ReminderNote = updateReminderDto.ReminderNote;
+            reminderDb.ReminderTitle = updateReminderDto.ReminderTitle;
             reminderDb.ReminderDate = updateReminderDto.ReminderDate;
             reminderDb.ReminderTime = updateReminderDto.ReminderTime;
             reminderDb.Priority = updateReminderDto.Priority;

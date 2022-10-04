@@ -29,11 +29,11 @@ namespace ProductivityApp.Services.Implementations
             {
                 throw new ReminderNotFoundException($"User with id {addReminderDto.UserId} was not found in the database.");
             }
-            if(string.IsNullOrEmpty(addReminderDto.ReminderInfo))
+            if(string.IsNullOrEmpty(addReminderDto.ReminderTitle))
             {
-                throw new ReminderDataException($"Reminder Name must not be empty!");
+                throw new ReminderDataException($"Reminder Title must not be empty!");
             }
-            if(string.IsNullOrEmpty(addReminderDto.ReminderTime))
+            if (string.IsNullOrEmpty(addReminderDto.ReminderTime))
             {
                 throw new ReminderDataException($"Reminder Time must not be empty!");
             }
@@ -92,7 +92,7 @@ namespace ProductivityApp.Services.Implementations
             {
                 throw new UserNotFoundException($"User with id {updateReminderDto.UserId} was not found in the database.");
             }
-            if (string.IsNullOrEmpty(updateReminderDto.ReminderInfo))
+            if (string.IsNullOrEmpty(updateReminderDto.ReminderTitle))
             {
                 throw new ReminderDataException($"Reminder Name must not be empty!");
             }
