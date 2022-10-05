@@ -24,12 +24,12 @@ namespace ProductivityApp.Services.Implementations
 
         public async Task AddReminder(AddReminderDto addReminderDto, int userId)
         {
-            User userDb = await _userRepository.GetById(addReminderDto.UserId);
+            User userDb = await _userRepository.GetById(userId);
             if (userDb == null)
             {
-                throw new UserNotFoundException($"User with id {addReminderDto.UserId} was not found in the database.");
+                throw new UserNotFoundException($"User with id {userId} was not found in the database.");
             }
-            if(string.IsNullOrEmpty(addReminderDto.ReminderTitle))
+            if (string.IsNullOrEmpty(addReminderDto.ReminderTitle))
             {
                 throw new ReminderDataException($"Reminder Title must not be empty!");
             }

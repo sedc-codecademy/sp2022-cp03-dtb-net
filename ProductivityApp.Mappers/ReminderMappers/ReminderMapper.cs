@@ -31,7 +31,7 @@ namespace ProductivityApp.Mappers.ReminderMappers
                 ReminderTime = addReminderDto.ReminderTime,
                 ReminderDate = addReminderDto.ReminderDate,
                 Priority = addReminderDto.Priority,
-                UserId = addReminderDto.UserId,
+                //UserId = addReminderDto.UserId,
             };
         }
 
@@ -45,6 +45,14 @@ namespace ProductivityApp.Mappers.ReminderMappers
             reminderDb.UserId = updateReminderDto.UserId;
 
             return reminderDb;
+        }
+
+        public static ReminderDto ToReminderDtoWithId(User userDb)
+        {
+            return new ReminderDto
+            {
+
+            };
         }
     }
 }
