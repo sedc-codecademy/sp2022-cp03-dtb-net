@@ -56,16 +56,12 @@ namespace ProductivityApp.Controllers
         {
             try
             {
-
                 return Ok(await _userService.GetAllUsers());
             }
             catch (InternalServerException e)
             {
-
                 return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-
-
         }
 
         [HttpGet("{id}")]
@@ -78,11 +74,8 @@ namespace ProductivityApp.Controllers
             }
             catch (InternalServerException e)
             {
-
                 return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-
-
         }
 
         [HttpDelete("{id}")]
@@ -103,8 +96,6 @@ namespace ProductivityApp.Controllers
 
                 return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-
         }
-
     }
 }
