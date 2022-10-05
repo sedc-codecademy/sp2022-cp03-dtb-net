@@ -15,7 +15,7 @@ namespace ProductivityApp.Domain.Entities
         public string ReminderNote { get; set; } = string.Empty;
         public string ReminderDate { get; set; } = string.Empty;
         public string ReminderTime { get; set; } = string.Empty;
-        public PriorityEnum Priority { get; set; }
+        public PriorityEnum Priority { get; set; } = PriorityEnum.High;
         public User? User { get; set; }
 
 

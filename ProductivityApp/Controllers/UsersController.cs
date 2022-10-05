@@ -25,7 +25,7 @@ namespace ProductivityApp.Controllers
         public async Task<ActionResult<ServiceResponse<int>>> Register(RegisterUserDto request)
         {
             var response = await _userService.Register(
-                new User { UserName = request.UserName }, request.Password
+                new User { UserName = request.UserName, FullName = request.FullName }, request.Password
                 );
 
             if (!response.Success)

@@ -12,8 +12,7 @@ namespace ProductivityApp.Mappers.UserMappers
         {
             return new UserDto
             {
-                FirstName = userDb.FirstName,
-                LastName = userDb.LastName,
+                FullName = userDb.FullName,
                 UserName = userDb.UserName,
                 Role = userDb.Role,
                 Sessions = userDb.Sessions.Select(s => s.ToSessionDto()).ToList()

@@ -39,13 +39,9 @@ namespace ProducitivityApp.DataAccess
 
             //User
             modelBuilder.Entity<User>()
-                .Property(f => f.FirstName)
+                .Property(f => f.FullName)
+                .IsRequired()
                 .HasMaxLength(50);
-
-            modelBuilder.Entity<User>()
-                .Property(l => l.LastName)
-                .HasMaxLength(50);
-               
 
             modelBuilder.Entity<User>()
                 .Property(u => u.UserName)
@@ -54,6 +50,10 @@ namespace ProducitivityApp.DataAccess
 
             modelBuilder.Entity<User>()
                 .Property(x => x.Password)
+                .IsRequired();
+
+            modelBuilder.Entity<User>()
+                .Property(x => x.ConfirmPassword)
                 .IsRequired();
 
             //Task

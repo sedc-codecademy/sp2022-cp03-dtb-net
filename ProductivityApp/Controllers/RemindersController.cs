@@ -11,7 +11,7 @@ using System.Security.Claims;
 
 namespace ProductivityApp.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RemindersController : ControllerBase

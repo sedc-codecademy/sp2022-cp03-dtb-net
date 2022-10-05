@@ -27,7 +27,7 @@ namespace ProductivityApp.Services.Implementations
             User userDb = await _userRepository.GetById(addReminderDto.UserId);
             if (userDb == null)
             {
-                throw new ReminderNotFoundException($"User with id {addReminderDto.UserId} was not found in the database.");
+                throw new UserNotFoundException($"User with id {addReminderDto.UserId} was not found in the database.");
             }
             if(string.IsNullOrEmpty(addReminderDto.ReminderTitle))
             {

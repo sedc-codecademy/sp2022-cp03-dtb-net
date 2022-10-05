@@ -6,6 +6,7 @@ using ProductivityApp.Dtos.UserDtos;
 using ProductivityApp.Mappers.UserMappers;
 using ProductivityApp.Services.Interfaces;
 using ProductivityApp.Shared;
+using ProductivityApp.Shared.CustomUserExceptions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -25,7 +26,6 @@ namespace ProductivityApp.Services.Implementations
         public async Task<ServiceResponse<string>> LogIn(string username, string password)
         {
             var response = new ServiceResponse<string>();
-
             var userDb = await _userRepository.GetUserByUsername(username);
 
             if (userDb == null)
@@ -49,7 +49,10 @@ namespace ProductivityApp.Services.Implementations
         {
             ServiceResponse<int> response = new ServiceResponse<int>();
 
-
+            if(user.Password != user.ConfirmPassword)
+            {
+                throw new UserDataException("Passwords do not match! Please try again");
+            }
             if (await _userRepository.UserExists(user.UserName))
             {
                 response.Success = false;
@@ -62,25 +65,19 @@ namespace ProductivityApp.Services.Implementations
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
-
             await _userRepository.Add(user);
-
 
             response.Data = user.Id;
             return response;
         }
 
-
-
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-
             using (var hmac = new System.Security.Cryptography.HMACSHA512())
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
-
         }
 
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
@@ -125,7 +122,6 @@ namespace ProductivityApp.Services.Implementations
             var usersDb = await _userRepository.GetAll();
             response.Data = usersDb.Select(u => u.ToUserDto()).ToList();
             return response;
-
         }
 
         public async Task<ServiceResponse<UserDto>> GetUserById(int id)
@@ -142,13 +138,11 @@ namespace ProductivityApp.Services.Implementations
                 response.Success = false;
                 response.Message = "Use not found!";
             }
-
             return response;
         }
 
         public async Task<ServiceResponse<List<UserDto>>> DeleteUser(int id)
         {
-
             ServiceResponse<List<UserDto>> response = new ServiceResponse<List<UserDto>>();
 
             User userDb = await _userRepository.GetById(id);
@@ -163,7 +157,6 @@ namespace ProductivityApp.Services.Implementations
                 response.Success = false;
                 response.Message = "User not found!";
             }
-
             return response;
 
         }

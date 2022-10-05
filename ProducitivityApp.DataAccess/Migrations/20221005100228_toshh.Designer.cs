@@ -12,8 +12,8 @@ using ProducitivityApp.DataAccess;
 namespace ProducitivityApp.DataAccess.Migrations
 {
     [DbContext(typeof(ProductivityAppDbContext))]
-    [Migration("20220914015749_passwordUpdate")]
-    partial class passwordUpdate
+    [Migration("20221005100228_toshh")]
+    partial class toshh
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,45 @@ namespace ProducitivityApp.DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("ProductivityApp.Domain.Entities.Reminder", b =>
+                {
+                    b.Property<int>("ReminderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReminderId"), 1L, 1);
+
+                    b.Property<int>("Priority")
+                        .HasMaxLength(30)
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReminderDate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReminderNote")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReminderTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReminderTitle")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReminderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reminders");
+                });
 
             modelBuilder.Entity("ProductivityApp.Domain.Entities.Session", b =>
                 {
@@ -96,12 +135,11 @@ namespace ProducitivityApp.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("ConfirmPassword")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastName")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -129,6 +167,17 @@ namespace ProducitivityApp.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ProductivityApp.Domain.Entities.Reminder", b =>
+                {
+                    b.HasOne("ProductivityApp.Domain.Entities.User", "User")
+                        .WithMany("Reminders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ProductivityApp.Domain.Entities.Session", b =>
@@ -160,6 +209,8 @@ namespace ProducitivityApp.DataAccess.Migrations
 
             modelBuilder.Entity("ProductivityApp.Domain.Entities.User", b =>
                 {
+                    b.Navigation("Reminders");
+
                     b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
