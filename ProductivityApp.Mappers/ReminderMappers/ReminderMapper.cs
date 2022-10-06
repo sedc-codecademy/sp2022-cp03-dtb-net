@@ -14,6 +14,7 @@ namespace ProductivityApp.Mappers.ReminderMappers
         {
             return new ReminderDto
             {
+                ReminderId = userDb.ReminderId,
                 ReminderNote = userDb.ReminderNote,
                 ReminderTitle = userDb.ReminderTitle,
                 ReminderDate = userDb.ReminderDate,
