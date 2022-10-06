@@ -5,7 +5,7 @@ namespace ProductivityApp.Domain.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum  PriorityEnum
     {
-        High = 1,
+        High = 0,
         Medium, 
         Low
     }
