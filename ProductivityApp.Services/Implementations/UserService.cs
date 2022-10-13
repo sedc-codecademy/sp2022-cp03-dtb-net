@@ -1,5 +1,9 @@
-﻿using Microsoft.Extensions.Options;
+﻿using MailKit.Security;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MimeKit;
+using ProducitivityApp.DataAccess;
 using ProducitivityApp.DataAccess.Interfaces;
 using ProductivityApp.Domain.Entities;
 using ProductivityApp.Dtos.UserDtos;
@@ -8,7 +12,11 @@ using ProductivityApp.Services.Interfaces;
 using ProductivityApp.Shared;
 using ProductivityApp.Shared.CustomUserExceptions;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using SmtpClient = MailKit.Net.Smtp.SmtpClient;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProductivityApp.Services.Implementations
 {
@@ -16,64 +24,73 @@ namespace ProductivityApp.Services.Implementations
     {
         private readonly IUserRepository _userRepository;
         private readonly IOptions<AppSettings> _options;
+        private readonly ProductivityAppDbContext _dbContext;
+        private readonly IConfiguration _config;
 
-        public UserService(IUserRepository userRepository, IOptions<AppSettings> options)
+        public UserService(IUserRepository userRepository, IOptions<AppSettings> options, ProductivityAppDbContext dbContext, IConfiguration config)
         {
             _userRepository = userRepository;
             _options = options;
+            _dbContext = dbContext;
+            _config = config;
         }
 
-        public async Task<ServiceResponse<string>> LogIn(string username, string password)
+        public async Task<ServiceResponse<string>> LogIn(string email, string password)
         {
             var response = new ServiceResponse<string>();
-            var userDb = await _userRepository.GetUserByUsername(username);
+            var userDb = await _userRepository.GetUserByEmail(email);
 
             if (userDb == null)
             {
                 response.Success = false;
                 response.Message = "User not found";
             }
+
+
             else if (!VerifyPasswordHash(password, userDb.PasswordHash, userDb.PasswordSalt))
             {
                 response.Success = false;
                 response.Message = "Wrong password";
             }
+            if (userDb?.VerifiedAt == null)
+            {
+                response.Success = false;
+                response.Message = "User is not verified";
+            }
             else
             {
                 response.Data = CreateToken(userDb);
+                response.Message = $"Welcome back {userDb.Fullname}";
             }
             return response;
         }
 
-        public async Task<ServiceResponse<int>> Register(User user, string password)
+        public async Task<ServiceResponse<int>> Register(RegisterUserDto registerUserDto)
         {
             ServiceResponse<int> response = new ServiceResponse<int>();
 
-            if(user.Password != user.ConfirmPassword)
-            {
-                throw new UserDataException("Passwords do not match! Please try again");
-            }
-            if (await _userRepository.UserExists(user.UserName))
-            {
-                response.Success = false;
-                response.Message = "User already exists";
-                return response;
-            }
+            await ValidateUserAsync(registerUserDto);
 
-            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+            CreatePasswordHash(registerUserDto.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
+            User userDb = registerUserDto.ToUserDb();
 
-            await _userRepository.Add(user);
 
-            response.Data = user.Id;
+            userDb.PasswordHash = passwordHash;
+            userDb.PasswordSalt = passwordSalt;
+            userDb.VerificationToken = CreateRandomToken();
+
+
+            await _userRepository.Add(userDb);
+
+
+            response.Data = userDb.Id;
             return response;
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            using (var hmac = new HMACSHA512())
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
@@ -82,7 +99,7 @@ namespace ProductivityApp.Services.Implementations
 
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
+            using (var hmac = new HMACSHA512(passwordSalt))
             {
                 var computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return computeHash.SequenceEqual(passwordHash);
@@ -94,8 +111,9 @@ namespace ProductivityApp.Services.Implementations
 
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier,user.Role.ToString())
+                new Claim(ClaimTypes.NameIdentifier, user.Username),
+                new Claim(ClaimTypes.NameIdentifier,user.Role.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Email.ToString())
             };
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(System.Text.Encoding
@@ -136,7 +154,7 @@ namespace ProductivityApp.Services.Implementations
             else
             {
                 response.Success = false;
-                response.Message = "Use not found!";
+                response.Message = "User not found!";
             }
             return response;
         }
@@ -160,5 +178,152 @@ namespace ProductivityApp.Services.Implementations
             return response;
 
         }
+        private string CreateRandomToken()
+        {
+            return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+        }
+        private async Task<ServiceResponse<AsyncVoidMethodBuilder>> ValidateUserAsync(RegisterUserDto registerUserDto)
+        {
+            ServiceResponse<AsyncVoidMethodBuilder> response = new ServiceResponse<AsyncVoidMethodBuilder>();
+
+            if (string.IsNullOrEmpty(registerUserDto.Email))
+            {
+                response.Success = false;
+                response.Message = "Please enter your email.";
+                return response;
+            }
+
+            if (string.IsNullOrEmpty(registerUserDto.Username) || string.IsNullOrEmpty(registerUserDto.Password) || string.IsNullOrEmpty(registerUserDto.ConfirmPassword))
+            {
+                response.Success = false;
+                response.Message = "Username and password are required fields.";
+                return response;
+            }
+            if (registerUserDto.Username.Length > 30)
+            {
+                response.Success = false;
+                response.Message = "Username: Maximum length for username is 30 characters.";
+                return response;
+
+            }
+            if (string.IsNullOrEmpty(registerUserDto.Fullname) && registerUserDto.Fullname.Length > 50)
+            {
+                response.Success = false;
+                response.Message = "Username: Maximum length for fullname is 50 characters.";
+                return response;
+            }
+
+
+            if (registerUserDto.Password != registerUserDto.ConfirmPassword)
+            {
+                response.Success = false;
+                response.Message = "Passwords do not match.";
+                return response;
+            }
+
+            var userDb = await _userRepository.GetUserByUsername(registerUserDto.Username);
+            if (userDb != null)
+            {
+                response.Success = false;
+                response.Message = $"The username {registerUserDto.Username} is already in use.";
+                return response;
+            }
+            if (await _userRepository.EmailExists(registerUserDto.Email))
+            {
+                response.Success = false;
+                response.Message = $"The email {registerUserDto.Email} is already in use.";
+                return response;
+            }
+            return response;
+        }
+
+        public async Task Verify(string token)
+        {
+            var userDb = await _userRepository.GetUserByToken(token);
+            if (userDb == null)
+            {
+                throw new UserDataException($"There is no user with this token {token}.");
+            }
+            userDb.VerifiedAt = DateTime.UtcNow.AddHours(1);
+            await _dbContext.SaveChangesAsync();
+
+        }
+
+        public async Task ForgotPassword(string email)
+        {
+            var userDb = await _userRepository.GetUserByEmail(email);
+            if (userDb == null)
+            {
+                throw new UserDataException($"There is no user with this email {email}.");
+            }
+
+            userDb.PasswordResetToken = CreateRandomToken();
+            userDb.ResetTokenExpires = DateTime.UtcNow.AddHours(1);
+            await _dbContext.SaveChangesAsync();
+            SendEmail(email);
+
+        }
+
+        public async Task ResetPassword(ResetPasswordDto request)
+        {
+            var userDb = await _userRepository.GetUserByResetPasswordToken(request.Token);
+
+            if (userDb == null || userDb.ResetTokenExpires < DateTime.UtcNow)
+            {
+                throw new UserDataException($"There is no such a token in the database  or your token may been expired.");
+            }
+            CreatePasswordHash(request.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+
+            request.ResetPasswordMapper(userDb);
+
+            userDb.PasswordHash = passwordHash;
+            userDb.PasswordSalt = passwordSalt;
+            userDb.PasswordResetToken = null;
+            userDb.ResetTokenExpires = null;
+
+            await _dbContext.SaveChangesAsync();
+            //127.0.0.1:5500
+        }
+
+        private async void SendEmail(string dBemail)
+        {
+            var request = new EmailObj() { };
+            var userDb = await _userRepository.GetUserByEmail(dBemail);
+            if (userDb == null)
+            {
+                throw new UserDataException($"There is no user with this email {dBemail}.");
+            }
+            string input = String.Format("Blah blah blah blah. Click {0} for more information.",
+                    "<a href=\"https://outlook.live.com/owa/\">here</a>");
+
+            //string mailstring = "Blah blah blah blah. Click <a href=\"https://outlook.live.com/owa/\">here</a> for more information.";
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(request.ProductivityApp = _config.GetSection("EmailUsername").Value));
+            email.To.Add(MailboxAddress.Parse(request.To = userDb.Email));
+            email.Subject = request.Subject = "You may reset your password now";
+            email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = request.Body = input };
+
+            using var smpt = new SmtpClient(); // mailkit.net.smpt
+            smpt.Connect(_config.GetSection("EmailHost").Value, 587, SecureSocketOptions.StartTls); //smpt.gmail.com if you want your sender to be gmail, -||- live.com(hotmail), -||- ofice365.com , connection method
+            smpt.Authenticate(_config.GetSection("EmailUsername").Value, _config.GetSection("EmailPassword").Value);
+            smpt.Send(email);
+            smpt.Disconnect(true);
+        }
+
+
     }
 }
+//conect and authentitecate with smtp sever , we use the gmail server domain to send email request through smpt clieng
+//user email level clients port 456 for ssl conection -> ssl stands for secure socket layer , protocol for web broswer and servers that allows for athtentitacion , ecryption and decryption for data send over email
+////Mime -> multi purpose internet mail extension , internet standar to support text in characters sets rather than ascii , mime message give some values
+//Simple mail transfer protocol
+
+//System.Net.Sockets.SocketException: 'A connection attempt failed because the connected party did not properly respond after a period of time,
+//or established connection failed because connected host has failed to respond.'
+
+
+//To help keep your account secure, from May 30, 2022, ​​Google no longer supports the use of third-party apps or devices which ask you to sign in to your Google Account using only your username and password.
+
+//Important: This deadline does not apply to Google Workspace or Google Cloud Identity customers. The enforcement date for these customers will be announced on the Workspace blog at a later date.
+
+//For more information, continue to read.

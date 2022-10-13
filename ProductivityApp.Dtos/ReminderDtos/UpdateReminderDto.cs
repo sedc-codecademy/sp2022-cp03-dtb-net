@@ -10,10 +10,10 @@ namespace ProductivityApp.Dtos.ReminderDtos
     public class UpdateReminderDto
     {
         public int Id { get; set; }
-        public string ReminderTitle { get; set; }
+        public string ReminderTitle { get; set; } = string.Empty;
         public string ReminderNote { get; set; } = string.Empty;
-        public string ReminderDate { get; set; }
-        public string ReminderTime { get; set; }
+        public string ReminderDate { get; set; } = string.Empty;
+        public string ReminderTime { get; set; } = string.Empty;
         public PriorityEnum Priority { get; set; }
         public int UserId { get; set; }
     }

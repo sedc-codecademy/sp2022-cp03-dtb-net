@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductivityApp.Domain.Entities;
 using ProductivityApp.Dtos.UserDtos;
 using ProductivityApp.Services.Interfaces;
 using ProductivityApp.Shared;
+using ProductivityApp.Shared.CustomUserExceptions;
 using ProductivityApp.Shared.ServerExceptions;
 
 namespace ProductivityApp.Controllers
@@ -24,9 +25,7 @@ namespace ProductivityApp.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<ServiceResponse<int>>> Register(RegisterUserDto request)
         {
-            var response = await _userService.Register(
-                new User { UserName = request.UserName, FullName = request.FullName }, request.Password
-                );
+            ServiceResponse<int> response = await _userService.Register(request);
 
             if (!response.Success)
             {
@@ -39,7 +38,7 @@ namespace ProductivityApp.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<ServiceResponse<string>>> Login(LoginUserDto request)
         {
-            var response = await _userService.LogIn(request.UserName, request.Password);
+            ServiceResponse<string> response = await _userService.LogIn(request.Email, request.Password);
 
 
             if (!response.Success)
@@ -49,6 +48,85 @@ namespace ProductivityApp.Controllers
 
             return Ok(response);
         }
+
+        [AllowAnonymous]
+        [HttpPost("verify")]
+
+
+        public async Task<IActionResult> Verify(string token)
+        {
+            //the idea is upon registration you send an email to the user 
+            // where you put this token as a query parametar
+            try
+            {
+                await _userService.Verify(token);
+                return Ok("User was verified");
+            }
+            catch (UserDataException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (InternalServerException e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+
+        }
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            try
+            {
+                await _userService.ForgotPassword(email);
+                return Ok("You may now reset your password");
+            }
+            catch (UserDataException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (InternalServerException e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto request)
+        {
+            try
+            {
+                await _userService.ResetPassword(request);
+                return Ok("Password successfully reset.");
+            }
+            catch (UserDataException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (InternalServerException e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+       //[AllowAnonymous]
+       // [HttpPost("sendEmailTest")]
+       // public IActionResult SendEmail(EmailObj request)
+       // {
+            
+       //     try
+       //     {
+       //         _userService.SendEmail(request);
+       //         return Ok("Email sent!");
+       //     }
+       //     catch (InternalServerException e)
+       //     {
+       //         return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+       //     }
+
+
+
+
+        //}
 
         [HttpGet("getAll")]
 

@@ -82,7 +82,7 @@ namespace ProductivityApp.Services.Implementations
         {
             Reminder reminderDb = await _reminderRepository.GetById(updateReminderDto.Id);
 
-            if(reminderDb != null)
+            if(reminderDb == null)
             {
                 throw new ReminderNotFoundException($"Reminder with the id {updateReminderDto.Id} was not found");
             }

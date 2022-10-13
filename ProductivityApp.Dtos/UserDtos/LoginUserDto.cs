@@ -1,8 +1,12 @@
-﻿namespace ProductivityApp.Dtos.UserDtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ProductivityApp.Dtos.UserDtos
 {
     public  class LoginUserDto
     {
-        public string UserName { get; set; } = string.Empty;
+        [Required,EmailAddress]
+        public string Email { get; set; } = string.Empty;
+       
         public string Password { get; set; } = string.Empty;
     }
 }

@@ -25,7 +25,7 @@ namespace ProductivityApp.Services.Implementations
         public async Task AddSession(AddSessionDto addSessionDto, int userId)
         {
 
-            User userDb = await _userRepository.GetById(addSessionDto.UserId);
+            User userDb = await _userRepository.GetById(userId);
             if (userDb == null)
             {
                 throw new UserNotFoundException($"User with id {addSessionDto.UserId} was not found in the database.");

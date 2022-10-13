@@ -43,9 +43,9 @@ namespace ProducitivityApp.DataAccess.Implementations
 
         }
 
-        public async Task<bool> UserExists(string userName)
+        public async Task<bool> UserExists(string username)
         {
-            if (await _dbContext.Users.AnyAsync(u => u.UserName.ToLower() == userName.ToLower()))
+            if (await _dbContext.Users.AnyAsync(u => u.Username.ToLower() == username.ToLower()))
             {
                 return true;
             }
@@ -60,7 +60,32 @@ namespace ProducitivityApp.DataAccess.Implementations
 
         public async Task<User> GetUserByUsername(string username)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(x => x.UserName.ToLower() == username.ToLower());
+            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Username.ToLower() == username.ToLower());
+        }
+
+        public async Task<bool> EmailExists(string email)
+        {
+            if (await _dbContext.Users.AnyAsync(x => x.Email.ToLower() == email.ToLower()))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<User> GetUserByEmail(string email)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
+        }
+
+        public async Task<User> GetUserByToken(string token)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.VerificationToken == token);
+
+        }
+
+        public async Task<User> GetUserByResetPasswordToken(string resetPasswordToken)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == resetPasswordToken);
         }
     }
 }

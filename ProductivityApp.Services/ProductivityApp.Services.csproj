@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="3.4.1" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ProducitivityApp.DataAccess\ProducitivityApp.DataAccess.csproj" />
     <ProjectReference Include="..\ProductivityApp.Dtos\ProductivityApp.Dtos.csproj" />
     <ProjectReference Include="..\ProductivityApp.Mappers\ProductivityApp.Mappers.csproj" />

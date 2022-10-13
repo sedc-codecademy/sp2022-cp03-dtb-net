@@ -39,22 +39,28 @@ namespace ProducitivityApp.DataAccess
 
             //User
             modelBuilder.Entity<User>()
-                .Property(f => f.FullName)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            modelBuilder.Entity<User>()
-                .Property(u => u.UserName)
-                .HasMaxLength(30)
+                .Property(f => f.Fullname)
+                .HasMaxLength(50)
                 .IsRequired();
 
             modelBuilder.Entity<User>()
-                .Property(x => x.Password)
+                .Property(u => u.Username)
                 .IsRequired();
-
+            //modelBuilder.Entity<User>()
+            //    .Property(u => u.Email)
+            //    .IsRequired();
             modelBuilder.Entity<User>()
-                .Property(x => x.ConfirmPassword)
-                .IsRequired();
+                .Property(u => u.PhoneNumber)
+                .HasMaxLength(30);
+                
+
+            //modelBuilder.Entity<User>()
+            //    .Property(x => x.Password)
+            //    .IsRequired();
+
+            //modelBuilder.Entity<User>()
+            //    .Property(x => x.ConfirmPassword)
+            //    .IsRequired();
 
             //Task
             modelBuilder.Entity<Task>()

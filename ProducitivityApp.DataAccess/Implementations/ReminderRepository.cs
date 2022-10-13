@@ -37,9 +37,11 @@ namespace ProducitivityApp.DataAccess.Implementations
 
         public async Task<Reminder> GetById(int id)
         {
+#pragma warning disable CS8603 // Possible null reference return.
             return await _dbContext.Reminders
                 .Include(x => x.User)
                 .SingleOrDefaultAsync(s => s.ReminderId == id);
+#pragma warning restore CS8603 // Possible null reference return.
         }
 
         public async Task Update(Reminder entity)

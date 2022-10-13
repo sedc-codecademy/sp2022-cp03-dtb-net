@@ -48,12 +48,6 @@ namespace ProductivityApp.Mappers.ReminderMappers
             return reminderDb;
         }
 
-        public static ReminderDto ToReminderDtoWithId(User userDb)
-        {
-            return new ReminderDto
-            {
-
-            };
-        }
+      
     }
 }
