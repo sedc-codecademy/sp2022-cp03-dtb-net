@@ -37,6 +37,8 @@ namespace ProductivityApp.Services.Implementations
 
         public async Task<ServiceResponse<string>> LogIn(string email, string password)
         {
+
+
             var response = new ServiceResponse<string>();
             var userDb = await _userRepository.GetUserByEmail(email);
 
@@ -52,11 +54,11 @@ namespace ProductivityApp.Services.Implementations
                 response.Success = false;
                 response.Message = "Wrong password";
             }
-            if (userDb?.VerifiedAt == null)
-            {
-                response.Success = false;
-                response.Message = "User is not verified";
-            }
+           // if (userDb?.VerifiedAt == null)
+            //{
+              //  response.Success = false;
+                //response.Message = "User is not verified";
+           // }
             else
             {
                 response.Data = CreateToken(userDb);
@@ -78,7 +80,7 @@ namespace ProductivityApp.Services.Implementations
 
             userDb.PasswordHash = passwordHash;
             userDb.PasswordSalt = passwordSalt;
-            userDb.VerificationToken = CreateRandomToken();
+          //  userDb.VerificationToken = CreateRandomToken();
 
 
             await _userRepository.Add(userDb);
@@ -237,17 +239,23 @@ namespace ProductivityApp.Services.Implementations
             return response;
         }
 
-        public async Task Verify(string token)
-        {
-            var userDb = await _userRepository.GetUserByToken(token);
-            if (userDb == null)
-            {
-                throw new UserDataException($"There is no user with this token {token}.");
-            }
-            userDb.VerifiedAt = DateTime.UtcNow.AddHours(1);
-            await _dbContext.SaveChangesAsync();
+        //public async Task<ServiceResponse<string>> Verify(string token)
+        //{
+        //    var response = new ServiceResponse<string>() { };
+        //    var userDb = await _userRepository.GetUserByToken(token);
+        //    if (userDb == null)
+        //    {
+        //        response.Success = false;
+        //        response.Message = $"You are trying to access token {token} that does not exist! ";
 
-        }
+        //    }
+        //    userDb.VerifiedAt = DateTime.UtcNow.AddHours(1);
+        //    await _dbContext.SaveChangesAsync();
+            
+        //    response.Data = token;
+        //    return response;
+
+        //}
 
         public async Task ForgotPassword(string email)
         {
@@ -294,9 +302,9 @@ namespace ProductivityApp.Services.Implementations
                 throw new UserDataException($"There is no user with this email {dBemail}.");
             }
             string input = String.Format("Blah blah blah blah. Click {0} for more information.",
-                    "<a href=\"https://outlook.live.com/owa/\">here</a>");
+                    "<a href=\"http://127.0.0.1:5500/src/index.html\">here</a>");
 
-            //string mailstring = "Blah blah blah blah. Click <a href=\"https://outlook.live.com/owa/\">here</a> for more information.";
+            //string mailstring = "Blah blah blah blah. Click <a href=\"http://127.0.0.1:5500/src/index.html\">here</a> for more information.";
             var email = new MimeMessage();
             email.From.Add(MailboxAddress.Parse(request.ProductivityApp = _config.GetSection("EmailUsername").Value));
             email.To.Add(MailboxAddress.Parse(request.To = userDb.Email));

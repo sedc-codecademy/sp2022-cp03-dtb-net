@@ -15,7 +15,7 @@ namespace ProductivityApp.Services.Interfaces
         Task<ServiceResponse<UserDto>> GetUserById(int id);
 
         Task<ServiceResponse<List<UserDto>>> DeleteUser(int id);
-        Task Verify(string token);
+        //Task<ServiceResponse<string>> Verify(string token);
         Task ForgotPassword(string email);
         Task ResetPassword(ResetPasswordDto request);
         

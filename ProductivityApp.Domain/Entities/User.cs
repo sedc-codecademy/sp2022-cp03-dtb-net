@@ -27,10 +27,10 @@ namespace ProductivityApp.Domain.Entities
         public string Fullname { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string? PhoneNumber { get; set; } 
+        public string? PhoneNumber { get; set; }
 
         public byte[] PasswordHash { get; set; } = new byte[] { };
-        
+
         public byte[] PasswordSalt { get; set; } = new byte[] { };
 
         public RoleEnum Role { get; set; } = RoleEnum.User;
