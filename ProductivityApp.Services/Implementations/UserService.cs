@@ -54,11 +54,11 @@ namespace ProductivityApp.Services.Implementations
                 response.Success = false;
                 response.Message = "Wrong password";
             }
-           // if (userDb?.VerifiedAt == null)
+            // if (userDb?.VerifiedAt == null)
             //{
-              //  response.Success = false;
-                //response.Message = "User is not verified";
-           // }
+            //  response.Success = false;
+            //response.Message = "User is not verified";
+            // }
             else
             {
                 response.Data = CreateToken(userDb);
@@ -71,7 +71,15 @@ namespace ProductivityApp.Services.Implementations
         {
             ServiceResponse<int> response = new ServiceResponse<int>();
 
+
             await ValidateUserAsync(registerUserDto);
+            var checkUserByEmail = await _userRepository.GetUserByEmail(registerUserDto.Email);
+            if (checkUserByEmail != null)
+            {
+                response.Success = false;
+                response.Message = $"The email {registerUserDto.Email} is already in use.";
+                return response;
+            }
 
             CreatePasswordHash(registerUserDto.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -80,7 +88,7 @@ namespace ProductivityApp.Services.Implementations
 
             userDb.PasswordHash = passwordHash;
             userDb.PasswordSalt = passwordSalt;
-          //  userDb.VerificationToken = CreateRandomToken();
+            //  userDb.VerificationToken = CreateRandomToken();
 
 
             await _userRepository.Add(userDb);
@@ -188,6 +196,7 @@ namespace ProductivityApp.Services.Implementations
         {
             ServiceResponse<AsyncVoidMethodBuilder> response = new ServiceResponse<AsyncVoidMethodBuilder>();
 
+
             if (string.IsNullOrEmpty(registerUserDto.Email))
             {
                 response.Success = false;
@@ -236,6 +245,13 @@ namespace ProductivityApp.Services.Implementations
                 response.Message = $"The email {registerUserDto.Email} is already in use.";
                 return response;
             }
+            var userDbEmail = await _userRepository.GetUserByEmail(registerUserDto.Email);
+            if (userDbEmail != null)
+            {
+                response.Success = false;
+                response.Message = $"The email {registerUserDto.Email} is already in use.";
+                return response;
+            }
             return response;
         }
 
@@ -251,7 +267,7 @@ namespace ProductivityApp.Services.Implementations
         //    }
         //    userDb.VerifiedAt = DateTime.UtcNow.AddHours(1);
         //    await _dbContext.SaveChangesAsync();
-            
+
         //    response.Data = token;
         //    return response;
 
@@ -302,7 +318,7 @@ namespace ProductivityApp.Services.Implementations
                 throw new UserDataException($"There is no user with this email {dBemail}.");
             }
             string input = String.Format("Blah blah blah blah. Click {0} for more information.",
-                    "<a href=\"http://127.0.0.1:5500/src/index.html\">here</a>");
+                    "<a href=\"http://127.0.0.1:5500/redirect.html\">here</a>");
 
             //string mailstring = "Blah blah blah blah. Click <a href=\"http://127.0.0.1:5500/src/index.html\">here</a> for more information.";
             var email = new MimeMessage();
