@@ -18,6 +18,8 @@ namespace ProductivityApp.Services.Interfaces
         //Task<ServiceResponse<string>> Verify(string token);
         Task ForgotPassword(string email);
         Task ResetPassword(ResetPasswordDto request);
+
+        Task<ServiceResponse<string>> GetPasswordResetToken(string email); 
         
     }
 }

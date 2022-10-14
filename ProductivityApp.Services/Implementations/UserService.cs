@@ -317,8 +317,9 @@ namespace ProductivityApp.Services.Implementations
             {
                 throw new UserDataException($"There is no user with this email {dBemail}.");
             }
-            string input = String.Format("Blah blah blah blah. Click {0} for more information.",
-                    "<a href=\"http://127.0.0.1:5500/redirect.html\">here</a>");
+            string input = String.Format("Follow the link to reset your password. Click {0} for more information." +
+                "Do not reply to this message.",
+                    "<a href=\"http://127.0.0.1:5500/src/redirect.html\">here</a>");
 
             //string mailstring = "Blah blah blah blah. Click <a href=\"http://127.0.0.1:5500/src/index.html\">here</a> for more information.";
             var email = new MimeMessage();
@@ -334,7 +335,19 @@ namespace ProductivityApp.Services.Implementations
             smpt.Disconnect(true);
         }
 
+        public async Task<ServiceResponse<string>> GetPasswordResetToken(string email)
+        {
+            var response = new ServiceResponse<string>();
+            var userDb = await _userRepository.GetUserByEmail(email);
+            if (userDb == null)
+            {
+                response.Success = false;
+                response.Message = "Invalid email.";
+            }
 
+            response.Data = userDb.PasswordResetToken;
+            return response;
+        }
     }
 }
 //conect and authentitecate with smtp sever , we use the gmail server domain to send email request through smpt clieng

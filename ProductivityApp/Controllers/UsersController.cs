@@ -90,6 +90,31 @@ namespace ProductivityApp.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
         }
+
+        [AllowAnonymous]
+        [HttpGet("getPasswordResetToken")]
+
+        public async Task<ActionResult<ServiceResponse<string>>> GetPasswordToken(string email)
+        {
+
+
+            ServiceResponse<string> response = await _userService.GetPasswordResetToken(email);
+
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+
+
+
+        }
+
+
+
+
+
         [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto request)
